@@ -14,7 +14,10 @@ const (
 )
 
 type Game struct {
-	touchIDs []ebiten.TouchID
+	musicPlayer   *Player
+	musicPlayerCh chan *Player
+	errCh         chan error
+	touchIDs      []ebiten.TouchID
 }
 
 var (
@@ -96,7 +99,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	draw.Fruits(screen, world, fruits)
 	msg := fmt.Sprintf(
-		"PC:\n  <- key: move left\n  -> key: move right\n  spacebar: drop fruit\n"+
+		"Original code: github.com/demouth/suika-game-go\nPC:\n  <- key: move left\n  -> key: move right\n  spacebar: drop fruit\n"+
 			"Touch Devices:\n  left: move left\n  right: move right\n  bottom: drop fruit\n"+
 			"HI-SCORE: %d\nSCORE: %d\nFPS: %0.2f",
 		calc.HiScore,
@@ -113,7 +116,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("suika-game-go")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	g, err := NewGame()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
 }
